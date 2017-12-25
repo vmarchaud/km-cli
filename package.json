@@ -1,0 +1,25 @@
+{
+  "name": "km-cli",
+  "version": "0.0.1",
+  "description": "Command line interface for Keymetrics.io",
+  "main": "index.js",
+  "author": "vmarchaud",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "async": "^2.6.0",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.5",
+    "caporal": "^0.9.0",
+    "chalk": "^2.3.0",
+    "express": "^4.16.2",
+    "kmjs-core": "^0.3.0",
+    "moment": "^2.20.1",
+    "tty-table": "^2.5.5"
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "bin": {
+    "km": "./bin/km"
+  }
+}
