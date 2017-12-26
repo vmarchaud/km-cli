@@ -20,6 +20,6 @@
     "node": ">=8"
   },
   "bin": {
-    "km": "./bin/km"
+    "km": "./bin/km.js"
   }
 }
