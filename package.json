@@ -1,6 +1,6 @@
 {
   "name": "keymetrics-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Command line interface for Keymetrics.io",
   "main": "index.js",
   "author": "vmarchaud",
