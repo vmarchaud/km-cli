@@ -1,87 +1,34 @@
-#!/usr/bin/env node
+#!/bin/sh
 
-'use strict'
+argv0=$(echo "$0" | sed -e 's,\\,/,g')
+basedir=$(dirname "$(readlink "$0" || echo "$argv0")")
 
-const Keymetrics = require('kmjs-core')
-const fs = require('fs')
-const async = require('async')
-const path = require('path')
-const os = require('os')
-const pkg = require('../package.json')
+case "$(uname -s)" in
+  Linux) basedir=$(dirname "$(readlink -f "$0" || echo "$argv0")");;
+  *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
+esac
 
-const km = new Keymetrics({
-  OAUTH_CLIENT_ID: '7412235273'
-}).use('embed')
+command_exists() {
+  command -v "$1" >/dev/null 2>&1;
+}
 
-let commands = [
-  {
-    name: 'status',
-    path: '../src/commands/status'
-  },
-  {
-    name: 'select',
-    path: '../src/commands/select'
-  },
-  {
-    name: 'trigger',
-    path: '../src/commands/trigger'
-  },
-  {
-    name: 'stats',
-    path: '../src/commands/stats'
-  },
-  {
-    name: 'list',
-    path: '../src/commands/list'
-  }
-]
+if command_exists node; then
+  if command_exists winpty && test -t 1; then
+    winpty node "$basedir/km.js" "$@"
+  else
+    exec node "$basedir/km.js" "$@"
+  fi
+  ret=$?
+# Debian and Ubuntu use "nodejs" as the name of the binary, not "node", so we
+# search for that too. See:
+# https://lists.debian.org/debian-devel-announce/2012/07/msg00002.html
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=614907
+elif command_exists nodejs; then
+  exec nodejs "$basedir/km.js" "$@"
+  ret=$?
+else
+  >&2 echo 'keymetrics-cli requires Node.js 4.0 or higher to be installed.'
+  ret=1
+fi
 
-let settings = {}
-let prog = require('caporal')
-
-setTimeout(() => {}, 1000)
-
-prog
-  .version(pkg.version)
-  .description(pkg.description)
-
-async.series([
-  // parse the settings
-  next => {
-    let settingsPath = path.resolve(os.homedir(), '.keymetrics-settings')
-    fs.access(settingsPath, fs.constants.R_OK | fs.constants.W_OK, (err) => {
-      if (!err) {
-        // if we can read it
-        settings = JSON.parse(fs.readFileSync(settingsPath).toString())
-        return next()
-      } else {
-        // otherwise create it
-        return fs.writeFile(settingsPath, '{}', next)
-      }
-    })
-  },
-  // register commands
-  next => {
-    // if we use a specific command, do not load other commands
-    let targetCommand = commands.find(command => command.name === process.argv[2])
-    if (targetCommand) {
-      commands = [ targetCommand ]
-    }
-
-    async.each(commands, (command, _next) => {
-      let Command = require(command.path)
-      prog = new Command(Object.assign(settings, {
-        km, cli: prog
-      }))
-      return _next()
-    }, next)
-  }
-], (err) => {
-  if (err) {
-    console.error(err)
-    return process.exit(-1)
-  }
-
-  // parse args and dispatch
-  return prog.parse(process.argv)
-})
+exit $ret
