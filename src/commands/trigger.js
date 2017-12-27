@@ -38,8 +38,8 @@ module.exports = class TriggerCommand {
           }).catch(reject)
         })
       })
-      .option('-a --apps', 'Only get status from these apps', null, null, false)
-      .option('-s --servers', 'Only get status from these servers', null, null, false)
+      .option('-a --apps', 'Only get status from these apps', utils.validateAppServerFilter, null, false)
+      .option('-s --servers', 'Only get status from these servers', utils.validateAppServerFilter, null, false)
       .action(this.launch.bind(this))
     return this.cli
   }
@@ -73,9 +73,9 @@ module.exports = class TriggerCommand {
         actions = actions.filter(action => {
           return action.app_name.match(new RegExp(utils.cleanRegex(opts.apps)))
         })
-      } else if (opts.apps) {
+      } else if (opts.apps instanceof Array) {
         actions = actions.filter(action => {
-          return action.app_name === opts.apps
+          return opts.apps.includes(action.app_name)
         })
       }
       // filter either by regex or full match
@@ -83,11 +83,10 @@ module.exports = class TriggerCommand {
         actions = actions.filter(action => {
           return action.server_name.match(new RegExp(utils.cleanRegex(opts.servers)))
         })
-      } else if (opts.servers) {
-        actions = actions.filter(action => {
-          return action.server_name === opts.servers
-        })
+      } else if (opts.servers instanceof Array) {
+        actions = actions.filter(action => opts.servers.includes(action.server_name))
       }
+
       let start = Date.now()
       async.map(actions, (action, next) => {
         console.log(`- Action on ${action.app_name} id ${action.process_id} on server ${action.server_name} launched`)

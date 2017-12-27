@@ -56,7 +56,29 @@ module.exports = class StatsCommand {
           let metrics = new Map()
           // build a map where each metrics has its apps and servers
           res.data.forEach(server => {
+            // in case the filter is an array, full text match
+            if (typeof opts.servers === 'object' &&
+            !opts.servers.includes(server.server_name)) {
+              return
+            }
+            // in case of the regex, match the server name against it
+            if (utils.isRegex(opts.servers) &&
+              server.server_name.match(new RegExp(utils.cleanRegex(opts.servers))) === null) {
+              return
+            }
+
             server.data.process.forEach(process => {
+              // in case the filter is an array, full text match
+              if (typeof opts.apps === 'object' &&
+              !opts.apps.includes(process.name)) {
+                return
+              }
+              // in case of the regex, match the server name against it
+              if (utils.isRegex(opts.apps) &&
+                process.name.match(new RegExp(utils.cleanRegex(opts.apps))) === null) {
+                return
+              }
+
               Object.keys(process.axm_monitor).forEach(metricName => {
                 let metric = metrics.get(metricName) || {}
 
@@ -90,7 +112,28 @@ module.exports = class StatsCommand {
           let actions = new Map()
           // build a map where each metrics has its apps and servers
           res.data.forEach(server => {
+            // in case the filter is an array, full text match
+            if (typeof opts.servers === 'object' &&
+            !opts.servers.includes(server.server_name)) {
+              return
+            }
+            // in case of the regex, match the server name against it
+            if (utils.isRegex(opts.servers) &&
+              server.server_name.match(new RegExp(utils.cleanRegex(opts.servers))) === null) {
+              return
+            }
             server.data.process.forEach(process => {
+              // in case the filter is an array, full text match
+              if (typeof opts.apps === 'object' &&
+              !opts.apps.includes(process.name)) {
+                return
+              }
+              // in case of the regex, match the server name against it
+              if (utils.isRegex(opts.apps) &&
+                process.name.match(new RegExp(utils.cleanRegex(opts.apps))) === null) {
+                return
+              }
+
               process.axm_actions
                 .map(action => action.action_name)
                 .forEach(actionName => {

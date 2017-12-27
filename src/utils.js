@@ -13,10 +13,13 @@ module.exports = class Utils {
   static validateAppServerFilter (val) {
     if (val.indexOf(',') > -1) {
       return val.split(',')
-    } else {
+    } else if (Utils.isRegex(val)) {
       return val
+    } else {
+      return [ val ]
     }
   }
+
   static errorHandler (err) {
     console.log(`An error has happened`)
     console.error(err)

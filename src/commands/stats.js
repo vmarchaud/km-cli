@@ -54,7 +54,9 @@ module.exports = class StatsCommand {
       apps = Array.from(apps)
       servers = Array.from(servers)
 
-      if (apps.length === 0 && servers.length === 0) {
+      let specificMetrics = ['cpu', 'memory']
+      if (apps.length === 0 && servers.length === 0 &&
+          !specificMetrics.includes(metric)) {
         return console.log(`- Found 0 apps with metric ${metric}`)
       }
       // then we need to filter them based on the filters
@@ -73,10 +75,8 @@ module.exports = class StatsCommand {
         servers = servers.filter(server => {
           return server.match(new RegExp(utils.cleanRegex(opts.servers)))
         })
-      } else if (opts.servers) {
-        servers = servers.filter(server => {
-          return server === opts.servers
-        })
+      } else if (opts.servers instanceof Array) {
+        servers = servers.filter(server => opts.servers.includes(server))
       }
       // request the aggregation
       this.km.data.metrics.retrieveAggregations(opts.bucket, {

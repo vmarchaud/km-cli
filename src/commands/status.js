@@ -49,8 +49,8 @@ module.exports = class StatusCommand {
     // register the command
     this.cli
       .command('status', 'get remote status')
-      .option('-a --apps', 'Only get status from these apps', null, null, false)
-      .option('-s --servers', 'Only get status from these servers', null, null, false)
+      .option('-a --apps', 'Only get status from these apps', utils.validateAppServerFilter, null, false)
+      .option('-s --servers', 'Only get status from these servers', utils.validateAppServerFilter, null, false)
       .option('-b --bucket <id>', 'Id of the bucket you want to use', null, opts.bucket, true)
       .complete(() => {
         return new Promise((resolve, reject) => {
