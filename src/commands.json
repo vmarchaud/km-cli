@@ -1,0 +1,42 @@
+[
+  {
+     "name": "status",
+     "path": "../src/commands/status",
+     "authenticated": true
+  },
+  {
+     "name": "select",
+     "path": "../src/commands/select",
+     "authenticated": true
+  },
+  {
+     "name": "trigger",
+     "path": "../src/commands/trigger",
+     "authenticated": true
+  },
+  {
+     "name": "stats",
+     "path": "../src/commands/stats",
+     "authenticated": true
+  },
+  {
+     "name": "list",
+     "path": "../src/commands/list",
+     "authenticated": true
+  },
+  {
+     "name": "logout",
+     "path": "../src/commands/logout",
+     "authenticated": true
+  },
+  {
+     "name": "login",
+     "path": "../src/commands/login",
+     "authenticated": false
+  },
+  {
+     "name": "register",
+     "path": "../src/commands/register",
+     "authenticated": false
+  }
+]
