@@ -94,9 +94,10 @@ module.exports = class StatsCommand {
           let rows = []
           let headers = getHeaders('Metric name')
           // build the rows
-          for (let [metric, opts] of metrics) {
+          for (let name in metrics) {
+            let opts = metrics[name]
             rows.push([
-              metric,
+              name,
               Array.from(opts.servers).join(', '),
               Array.from(opts.apps).join(', ')
             ])
@@ -151,9 +152,10 @@ module.exports = class StatsCommand {
           let rows = []
           let headers = getHeaders('Action name')
           // build the rows
-          for (let [action, opts] of actions) {
+          for (let name of actions) {
+            let opts = actions[name]
             rows.push([
-              action,
+              name,
               Array.from(opts.servers).join(', '),
               Array.from(opts.apps).join(', ')
             ])
