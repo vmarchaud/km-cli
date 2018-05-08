@@ -2,7 +2,7 @@
 
 'use strict'
 
-const Keymetrics = require('../../kmjs-core')
+const Keymetrics = require('kmjs-core')
 const fs = require('fs')
 const async = require('async')
 const path = require('path')
