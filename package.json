@@ -1,5 +1,5 @@
 {
-  "name": "@pm2/cli",
+  "name": "@keymetrics/cli",
   "version": "0.1.0",
   "description": "Command line interface for https://pm2.io/plus",
   "main": "index.js",
