@@ -1,6 +1,6 @@
 'use strict'
 
-const AuthStrategy = require('../../kmjs-core/src/auth_strategies/strategy')
+const AuthStrategy = require('kmjs-core/src/auth_strategies/strategy')
 
 const http = require('http')
 const fs = require('fs')
