@@ -832,9 +832,9 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-kmjs-core@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/kmjs-core/-/kmjs-core-0.3.0.tgz#81dff01646f60b1a5214fe561fa0b7f5d56d27c8"
+kmjs-core@^0.5.8:
+  version "0.5.8"
+  resolved "https://registry.yarnpkg.com/kmjs-core/-/kmjs-core-0.5.8.tgz#d34896a481c4623e7a61fa1957bc5029ab2a0966"
   dependencies:
     async "^2.4.1"
     axios "^0.16.2"

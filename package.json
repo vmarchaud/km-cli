@@ -1,7 +1,7 @@
 {
-  "name": "keymetrics-cli",
-  "version": "0.0.3",
-  "description": "Command line interface for Keymetrics.io",
+  "name": "@pm2/cli",
+  "version": "0.1.0",
+  "description": "Command line interface for https://pm2.io/plus",
   "main": "index.js",
   "author": "vmarchaud",
   "license": "Apache-2.0",
@@ -12,14 +12,14 @@
     "caporal": "^0.9.0",
     "chalk": "^2.3.0",
     "express": "^4.16.2",
-    "kmjs-core": "^0.3.0",
+    "kmjs-core": "^0.5.8",
     "moment": "^2.20.1",
     "tty-table": "^2.5.5"
   },
   "engines": {
-    "node": ">=8"
+    "node": ">=4"
   },
   "bin": {
-    "km": "./bin/km.js"
+    "pmp": "./bin/pmp"
   }
 }
