@@ -34,7 +34,8 @@ module.exports = class StatusCommand {
             console.log(`You succesfully logged as ${user.username} !`)
             let buckets = results[1].data
             if (buckets.length > 0) {
-              return console.log(`You have access to ${buckets.length} buckets !`)
+              console.log(`You have access to ${buckets.length} buckets !`)
+              return process.exit(0)
             }
             // we will create one if he doesnt have one already
             console.log(`It seems that you dont have any bucket to link your pm2 to, we will create one for you ..`)
@@ -49,6 +50,7 @@ module.exports = class StatusCommand {
               console.log(`You can also access our dedicated UI by going here :
                 https://app.keymetrics.io/#/bucket/${bucket.id}/dashboard
               `)
+              return process.exit(0)
             })
           }).catch(err => {
             console.error(`Oups, a error happened : ${err.message}`)
