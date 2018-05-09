@@ -47,4 +47,30 @@ module.exports = class Utils {
 
     return (neg ? '-' : '') + numStr + ' ' + unit
   }
+
+  static completeAppNames (km, opts) {
+    return new Promise((resolve, reject) => {
+      this.km.data.status.retrieve(opts.bucket).then(res => {
+        const servers = res.data
+        const apps = servers.reduce((agg, server) => {
+          server.data.process.forEach(process => {
+            if (!agg.has(process.name)) {
+              agg.add(process.name)
+            }
+          })
+          return agg
+        }, new Set())
+        return resolve(Array.from(apps))
+      }).catch(reject)
+    })
+  }
+
+  static completeServersNames (km, opts) {
+    return new Promise((resolve, reject) => {
+      this.km.data.status.retrieve(opts.bucket).then(res => {
+        let servers = res.data
+        return resolve(servers.map(server => server.server_name))
+      }).catch(reject)
+    })
+  }
 }

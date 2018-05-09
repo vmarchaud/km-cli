@@ -28,7 +28,10 @@ module.exports = class StatsCommand {
         })
       })
       .option('-a --apps', 'Only get stats from these apps', utils.validateAppServerFilter, null, false)
+      .complete(_ => utils.completeAppNames(this.km, opts))
       .option('-s --servers', 'Only get stats from these servers', utils.validateAppServerFilter, null, false)
+      .complete(_ => utils.completeServerNames(this.km, opts))
+      .option('--by-apps', 'Aggregate by application instead of server', this.cli.BOOL, false, false)
       .action(this.launch.bind(this))
     return this.cli
   }
@@ -41,12 +44,13 @@ module.exports = class StatsCommand {
     let apps = new Set()
     let servers = new Set()
     let metric = args.metric
+    const isMetricInBytes = metric === 'memory'
 
     this.km.data.status.retrieve(opts.bucket).then(res => {
       res.data.forEach(server => {
         server.data.process.forEach(process => {
           let isMetricHere = Object.keys(process.axm_monitor).includes(metric)
-          if (!isMetricHere) return
+          if (!isMetricHere && metric !== 'cpu' && metric !== 'memory') return
           apps.add(process.name)
           servers.add(server.server_name)
         })
@@ -67,7 +71,7 @@ module.exports = class StatsCommand {
         })
       } else if (opts.apps) {
         apps = apps.filter(app => {
-          return app === opts.apps
+          return opts.apps.includes(app)
         })
       }
       // filter either by regex or full match
@@ -78,6 +82,7 @@ module.exports = class StatsCommand {
       } else if (opts.servers instanceof Array) {
         servers = servers.filter(server => opts.servers.includes(server))
       }
+
       // request the aggregation
       this.km.data.metrics.retrieveAggregations(opts.bucket, {
         aggregations: [
@@ -86,21 +91,22 @@ module.exports = class StatsCommand {
             start: args.timerange,
             apps: Array.from(apps),
             servers: Array.from(servers),
-            types: ['histogram', 'servers']
+            types: ['histogram', opts.byApps === true ? 'apps' : 'servers']
           }
         ]
       }).then(res => {
         let aggregation = res.data[0]
         let series = []
         // build series
-        for (let server of aggregation.by_server.buckets) {
+        let aggregationType = `by_${opts.byApps === true ? 'app' : 'server'}`
+        for (let server of aggregation[aggregationType].buckets) {
           series.push({
             title: server.key,
             x: server.histogram.buckets.map(point => {
               return moment(point.key_as_string).format('DD/MM HH') + 'h'
             }),
             y: server.histogram.buckets.map(point => {
-              return point.stats.avg
+              return isMetricInBytes ? point.stats.avg / 1024 / 1024 : point.stats.avg
             }),
             style: {
               line: randomColor()
