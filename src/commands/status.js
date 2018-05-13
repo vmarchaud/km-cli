@@ -12,7 +12,12 @@ const headers = [
     width: 30
   },
   {
-    value: 'Server Name'
+    value: 'ID',
+    width: 5
+  },
+  {
+    value: 'Mode',
+    width: 12
   },
   {
     value: 'Status',
@@ -28,8 +33,12 @@ const headers = [
     width: 12
   },
   {
-    value: 'Mode',
-    width: 12
+    value: 'Restart',
+    width: 10
+  },
+  {
+    value: 'Uptime',
+    width: 10
   },
   {
     value: 'CPU',
@@ -38,6 +47,9 @@ const headers = [
   {
     value: 'Memory',
     width: 10
+  },
+  {
+    value: 'Server Name'
   }
 ]
 
@@ -65,19 +77,9 @@ module.exports = class StatusCommand {
   }
 
   launch (args, opts) {
-    let start = Date.now()
     this.km.data.status.retrieve(opts.bucket)
       .then(res => {
-        console.log(`- Retrieved from API in ${Date.now() - start} ms`)
-        start = Date.now()
-
         let servers = res.data
-
-        let avgOld = servers
-          .map(server => moment().diff(moment(server.updated_at)))
-          .reduce((total, val) => total + val, 0)
-        avgOld = avgOld / servers.length
-        console.log(`- Computed on ${Math.floor(avgOld)} ms old data`)
 
         let rows = []
         servers.forEach(server => {
@@ -106,17 +108,19 @@ module.exports = class StatusCommand {
 
             rows.push([
               process.name,
-              server.server_name,
-              process.status,
+              process.pm_id,
               process.exec_mode.replace('_mode', ''),
+              process.status,
+              process.restart_time,
+              utils.timeSince(process.pm_uptime),
               process.cpu + '%',
-              utils.humanizeBytes(process.memory)
+              utils.humanizeBytes(process.memory),
+              server.server_name
             ])
           })
         })
         var t1 = Table(headers, rows)
         console.log(t1.render())
-        console.log(`- Rendered in ${Date.now() - start} ms`)
       })
       .catch(error => {
         console.error(`Error while retrieving status :`)

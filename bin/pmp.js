@@ -98,7 +98,7 @@ async.series([
               settings.bucket = buckets[0].id
             } else if (targetCommand.name !== 'select') {
               // otherwise tell him to select one
-              console.log(`You shoud select the bucket you want to inspect with "${cliName} select <bucket_name>"`)
+              console.log(`You shoud select the bucket you want to inspect with "${cliName} select <bucket_name>" or using the "--bucket <id>" flag`)
             }
             return load()
           }).catch(ignoredErr => load())
