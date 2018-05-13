@@ -20,6 +20,6 @@
     "node": ">=4"
   },
   "bin": {
-    "pmp": "./bin/pmp"
+    "km": "./bin/km"
   }
 }

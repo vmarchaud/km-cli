@@ -15,9 +15,7 @@ let prog = require('caporal')
 const strategy = new CustomStrategy({
   client_id: '7412235273'
 })
-const km = new Keymetrics({
-  OAUTH_CLIENT_ID: '7412235273'
-}).use(strategy)
+const km = new Keymetrics().use(strategy)
 
 let settings = {}
 const cliName = process.argv[1].split('/').pop().split('.')[0]
