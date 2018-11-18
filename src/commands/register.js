@@ -3,7 +3,7 @@
 
 const LoginCommand = require('./login')
 
-module.exports = class StatusCommand {
+module.exports = class RegisterCommand {
   constructor (opts) {
     this.km = opts.km
     this.cli = opts.cli

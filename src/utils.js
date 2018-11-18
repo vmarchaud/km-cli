@@ -1,6 +1,9 @@
 
 'use strict'
 
+const exec = require('child_process').exec
+const inquirer = require('inquirer')
+
 module.exports = class Utils {
   static isRegex (val) {
     return typeof val === 'string' && val[0] === '/' && val[val.length - 1] === '/'
@@ -11,6 +14,8 @@ module.exports = class Utils {
   }
 
   static validateAppServerFilter (val) {
+    if (val === false) return []
+
     if (val.indexOf(',') > -1) {
       return val.split(',')
     } else if (Utils.isRegex(val)) {
@@ -74,6 +79,90 @@ module.exports = class Utils {
     })
   }
 
+  static async findServerFromRegex (km, opts) {
+    const res = await km.data.status.retrieve(opts.bucket)
+    const servers = res.data
+    const reg = new RegExp(this.cleanRegex(opts.servers), 'gi')
+    const matched = servers
+      .filter(server => reg.test(server.server_name))
+      .map(server => server.server_name)
+    // yes because a normal behavior would tell that if the regex doesn't match
+    // we shouldn't have result, if we send nothing as filter we will have everything
+    return matched.length > 0 ? matched : [ '1mposs1bleToF1nd' ]
+  }
+
+  static async findAppFromRegex (km, opts) {
+    const res = await km.data.status.retrieve(opts.bucket)
+    const servers = res.data
+    // compute the list of apps
+    let apps = servers
+      .map(server => server.data.process.map(process => process.name))
+      .reduce((set, apps) => {
+        apps.forEach(app => {
+          set.add(app)
+        })
+        return set
+      }, new Set())
+    apps = Array.from(apps)
+    const reg = new RegExp(this.cleanRegex(opts.apps), 'gi')
+    const matched = apps
+      .filter(app => reg.test(app))
+    // yes because a normal behavior would tell that if the regex doesn't match
+    // we shouldn't have result, if we send nothing as filter we will have everything
+    return matched.length > 0 ? matched : [ '1mposs1bleToF1nd' ]
+  }
+
+  static async getSourceFromMetric (km, opts, metric) {
+    switch (metric.initiator) {
+      case 'nodejs': {
+        return `nodejs/${metric.process.server}/${metric.process.name}/${metric.process.pm_id}`
+      }
+      case 'golang': {
+        return `golang/${metric.process.server}/${metric.process.name}/${metric.process.pm_id}`
+      }
+      case 'webcheck': {
+        const { data } = await km.bucket.webchecks.get(opts.bucket, metric.metadata.webcheck)
+        return `webcheck/${data.name}`
+      }
+      case 'collector': {
+        return `collector/${metric.metadata.collector}`
+      }
+    }
+    return 'undefined'
+  }
+
+  static async resolveProcessToProfile (km, opts) {
+    const res = await km.data.status.retrieve(opts.bucket)
+    const availables = res.data.filter(server => {
+      return server.data.active !== false && server.active !== false
+    }).filter(server => {
+      return opts.servers.length === 0 || opts.servers.includes(server.server_name)
+    }).map(server => {
+      return server.data.process.filter(process => {
+        return process.status === 'online'
+      }).filter(process => {
+        return opts.apps.length === 0 || opts.apps.includes(process.name)
+      }).map(process => {
+        return {
+          pm_id: process.pm_id,
+          name: process.name,
+          server: server.server_name
+        }
+      })
+    })
+    return Array.prototype.concat(...availables)
+  }
+
+  static async askWithChoices (question, choices) {
+    const res = await inquirer.prompt({
+      type: 'list',
+      name: 'random',
+      message: question,
+      choices
+    })
+    return res.random
+  }
+
   static timeSince (date) {
     var seconds = Math.floor((new Date() - date) / 1000)
     var interval = Math.floor(seconds / 31536000)
@@ -98,5 +187,37 @@ module.exports = class Utils {
       return interval + 'm'
     }
     return Math.floor(seconds) + 's'
+  }
+
+  static open (target, appName, callback) {
+    let opener
+    const escape = function (s) {
+      return s.replace(/"/g, '\\"')
+    }
+
+    if (typeof (appName) === 'function') {
+      callback = appName
+      appName = null
+    }
+
+    switch (process.platform) {
+      case 'darwin': {
+        opener = appName ? `open -a "${escape(appName)}"` : `open`
+        break
+      }
+      case 'win32': {
+        opener = appName ? `start "" ${escape(appName)}"` : `start ""`
+        break
+      }
+      default: {
+        opener = appName ? escape(appName) : `xdg-open`
+        break
+      }
+    }
+
+    if (process.env.SUDO_USER) {
+      opener = 'sudo -u ' + process.env.SUDO_USER + ' ' + opener
+    }
+    return exec(`${opener} "${escape(target)}"`, callback)
   }
 }

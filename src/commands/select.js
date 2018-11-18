@@ -14,13 +14,10 @@ module.exports = class StatusCommand {
     this.cli
       .command('select', 'select a server for future actions')
       .argument('<bucket>', 'the selected bucket')
-      .complete(() => {
-        return new Promise((resolve, reject) => {
-          this.km.bucket.retrieveAll().then(res => {
-            let buckets = res.data
-            return resolve(buckets.map(bucket => bucket.name))
-          }).catch(reject)
-        })
+      .complete(async () => {
+        const res = this.km.bucket.retrieveAll()
+        let buckets = res.data
+        return buckets.map(bucket => bucket.name)
       })
       .action(this.launch.bind(this))
     return this.cli

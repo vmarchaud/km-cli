@@ -10,18 +10,8 @@
      "authenticated": true
   },
   {
-     "name": "trigger",
-     "path": "../src/commands/trigger",
-     "authenticated": true
-  },
-  {
-     "name": "stats",
-     "path": "../src/commands/stats",
-     "authenticated": true
-  },
-  {
-     "name": "list",
-     "path": "../src/commands/list",
+     "name": "metrics",
+     "path": "../src/commands/metrics",
      "authenticated": true
   },
   {
@@ -38,5 +28,10 @@
      "name": "register",
      "path": "../src/commands/register",
      "authenticated": false
+  },
+  {
+     "name": "profiling",
+     "path": "../src/commands/profiling",
+     "authenticated": true
   }
 ]

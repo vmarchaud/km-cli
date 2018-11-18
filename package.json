@@ -1,23 +1,23 @@
 {
-  "name": "@keymetrics/cli",
-  "version": "0.2.0",
-  "description": "Command line interface for https://pm2.io/plus",
-  "main": "index.js",
+  "name": "@pm2/cli",
+  "version": "0.3.0",
+  "description": "Command line interface for https://pm2.io/enterprise",
   "author": "vmarchaud",
   "license": "Apache-2.0",
   "dependencies": {
+    "@pm2/js-api": "^0.5.33",
     "async": "^2.6.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.5",
-    "caporal": "^0.9.0",
+    "caporal": "^1.1.0",
     "chalk": "^2.3.0",
     "express": "^4.16.2",
-    "kmjs-core": "^0.5.8",
+    "inquirer": "^6.2.0",
     "moment": "^2.20.1",
     "tty-table": "^2.6.3"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=10"
   },
   "bin": {
     "km": "./bin/km"

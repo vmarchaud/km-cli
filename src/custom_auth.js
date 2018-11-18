@@ -1,14 +1,14 @@
 'use strict'
 
-const AuthStrategy = require('kmjs-core/src/auth_strategies/strategy')
+const AuthStrategy = require('@pm2/js-api/src/auth_strategies/strategy')
 
 const http = require('http')
 const fs = require('fs')
 const url = require('url')
-const exec = require('child_process').exec
 const async = require('async')
 const path = require('path')
 const os = require('os')
+const utils = require('./utils')
 
 module.exports = class CustomStrategy extends AuthStrategy {
   // the client will try to call this but we handle this part ourselves
@@ -100,9 +100,8 @@ module.exports = class CustomStrategy extends AuthStrategy {
       if (result.refresh_token) {
         this.authenticated = true
         let file = path.resolve(os.homedir(), '.keymetrics-tokens')
-        fs.writeFile(file, JSON.stringify(result), () => {
-          return cb(err, result)
-        })
+        fs.writeFileSync(file, JSON.stringify(result))
+        return cb(err, result)
       } else {
         return cb(err, result)
       }
@@ -136,48 +135,14 @@ module.exports = class CustomStrategy extends AuthStrategy {
       return cb(query)
     })
     server.listen(43532, () => {
-      this.open(`${this.oauth_endpoint}${this.oauth_query}`)
+      utils.open(`${this.oauth_endpoint}${this.oauth_query}`)
     })
-  }
-
-  open (target, appName, callback) {
-    let opener
-    const escape = function (s) {
-      return s.replace(/"/g, '\\"')
-    }
-
-    if (typeof (appName) === 'function') {
-      callback = appName
-      appName = null
-    }
-
-    switch (process.platform) {
-      case 'darwin': {
-        opener = appName ? `open -a "${escape(appName)}"` : `open`
-        break
-      }
-      case 'win32': {
-        opener = appName ? `start "" ${escape(appName)}"` : `start ""`
-        break
-      }
-      default: {
-        opener = appName ? escape(appName) : `xdg-open`
-        break
-      }
-    }
-
-    if (process.env.SUDO_USER) {
-      opener = 'sudo -u ' + process.env.SUDO_USER + ' ' + opener
-    }
-    return exec(`${opener} "${escape(target)}"`, callback)
   }
 
   deleteTokens (km) {
     return new Promise((resolve, reject) => {
       // revoke the refreshToken
-      km.auth.revoke()
-      .then(res => {
-        // remove the token from the filesystem
+      km.auth.revoke().then(res => {
         let file = path.resolve(os.homedir(), '.keymetrics-tokens')
         fs.unlinkSync(file)
         return resolve(res)
